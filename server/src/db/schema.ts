@@ -1,6 +1,4 @@
-import Database from 'better-sqlite3';
-
-export function initializeDatabase(db: Database.Database): void {
+export function initializeDatabase(db: DatabaseWrapper): void {
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
 
