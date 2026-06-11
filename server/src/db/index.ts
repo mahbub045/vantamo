@@ -12,17 +12,19 @@ import { SqliteActivityRepo } from './repositories/sqlite/activity.repo';
 import { SqliteNotificationRepo } from './repositories/sqlite/notification.repo';
 import type { Repositories } from './repositories/interfaces';
 
-export let repositories: Repositories = {} as Repositories;
+// Use a single mutable object — never reassign this reference
+export const repositories: Repositories = {} as Repositories;
 export let db: DatabaseWrapper;
 
-export async function initDatabase(): Promise<Repositories> {
+export async function initDatabase(): Promise<void> {
   const dbDir = path.dirname(config.database.path);
   if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
 
   db = await createDatabase(config.database.path);
   initializeDatabase(db);
 
-  repositories = {
+  // Populate the SAME object (not a new one) so existing references work
+  Object.assign(repositories, {
     users: new SqliteUserRepo(db),
     clients: new SqliteClientRepo(db),
     projects: new SqliteProjectRepo(db),
@@ -30,7 +32,5 @@ export async function initDatabase(): Promise<Repositories> {
     comments: new SqliteCommentRepo(db),
     activities: new SqliteActivityRepo(db),
     notifications: new SqliteNotificationRepo(db),
-  };
-
-  return repositories;
+  });
 }
